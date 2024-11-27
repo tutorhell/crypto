@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSA Encryption Demo</title>
+</head>
+<body>
+    <h1>Simple RSA Encryption</h1>
+    <form onsubmit="rsaEncrypt(event)">
+        <label>Prime Number p: <input type="number" id="p" required></label><br>
+        <label>Prime Number q: <input type="number" id="q" required></label><br>
+        <label>Message (as number): <input type="number" id="msg" required></label><br>
+        <button type="submit">Encrypt</button>
+    </form>
+    <h2>Results</h2>
+    <p>Public Key: (n=<span id="n"></span>, e=<span id="e"></span>)</p>
+    <p>Private Key: d=<span id="d"></span></p>
+    <p>Encrypted Message: <span id="ciphertext"></span></p>
+    <p>Decrypted Message: <span id="decrypted"></span></p>
+
+    <script>
+        function rsaEncrypt(event) {
+            event.preventDefault();
+
+            // Get inputs
+            const p = parseInt(document.getElementById('p').value);
+            const q = parseInt(document.getElementById('q').value);
+            const msg = parseInt(document.getElementById('msg').value);
+
+            // RSA calculations
+            const n = p * q;
+            const t = (p - 1) * (q - 1);
+
+            // Find e (public exponent)
+            let e = 2;
+            while (e < t && gcd(e, t) !== 1) e++;
+
+            // Find d (private key)
+            let d = 1;
+            while ((e * d) % t !== 1) d++;
+
+            // Encrypt message
+            const ciphertext = modPow(msg, e, n);
+
+            // Decrypt message
+            const decrypted = modPow(ciphertext, d, n);
+
+            // Display results
+            document.getElementById('n').innerText = n;
+            document.getElementById('e').innerText = e;
+            document.getElementById('d').innerText = d;
+            document.getElementById('ciphertext').innerText = ciphertext;
+            document.getElementById('decrypted').innerText = decrypted;
+
+            // Helper: Calculate GCD
+            function gcd(a, b) {
+                return b === 0 ? a : gcd(b, a % b);
+            }
+
+            // Helper: Modular exponentiation
+            function modPow(base, exp, mod) {
+                let result = 1;
+                base = base % mod;
+                while (exp > 0) {
+                    if (exp % 2 === 1) result = (result * base) % mod;
+                    exp = Math.floor(exp / 2);
+                    base = (base * base) % mod;
+                }
+                return result;
+            }
+        }
+    </script>
+</body>
+</html>
